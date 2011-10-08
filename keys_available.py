@@ -3,4 +3,5 @@
 from Xlib import XK
 
 for name in dir(XK):
-	print name
+	if name[:3] == "XK_":
+		print name[3:]
