@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 import multiprocessing
 import events
+import time
 
 class Macros(multiprocessing.Process):
 	
@@ -22,34 +23,49 @@ class Macros(multiprocessing.Process):
 			self.Script(self.conf["Macro"])
 			
 	def Single(self, macro):
-		print macro
 		macro = macro.split("-")
 		while True:
 			Detail = self.Detail.get()
 			Type = self.Type.get()
 			if events.Is_Key(Type):
-				print macro[0]
-				print events.Keysym(Detail)
-				if events.Keysym(Detail) == macro[0]:	
-					self.handler(macro[1])
+				if events.Keysym_to_String(Detail) == macro[0]:	
+					self.handler([macro[1]])
 						
 			else:
 				if "Button%s" % Detail == macro[0]:
-					self.handler(macro[1])
+					self.handler([macro[1]])
 				
 					
 	def Multiple(self, macro):
-		NotImplemented
+		macro = macro.split("(")
+		macro[1] = macro[1].strip(")")
+		print macro
+		while True:
+			Detail = self.Detail.get()
+			Type = self.Type.get()
+			if events.Is_Key(Type):
+				if events.Keysym_to_String(Detail) == macro[0]:	
+					self.handler(macro[1].split("-"))
+						
+			else:
+				if "Button%s" % Detail == macro[0]:
+					macro = macro[1].split("-")
+					self.handler(macro)
 	
 	def Script(self, macro):
 		NotImplemented
 
 	def handler(self, macro):
-		print macro
-		if "Button" in macro:
-			events.Fake_Button(macro.strip("Button"))
-		else:
-			events.Fake_Key(macro)
+		for i in range(len(macro)):
+			if "|" in macro[i]:
+				delay = macro[i].split("|")[0]
+				macro[i] = macro[i].split("|")[1]
+				time.sleep(int(delay))
+				
+			if "Button" in macro[i]:
+				events.Fake_Button(macro[i].strip("Button"))
+			else:
+				events.Fake_Key(macro[i])
 			
 	def kill(self):
 		self.Events.terminate()

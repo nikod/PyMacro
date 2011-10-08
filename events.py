@@ -47,12 +47,13 @@ def Is_Key(event):
 	else:
 		return False
 
-def Keycode(key):
+def String_to_Keycode(key):
 	d=display.Display()
-	keycode = d.keysym_to_keycode(key)
+	keysym = XK.string_to_keysym(key)
+	keycode = d.keysym_to_keycode(keysym)
 	return keycode
 
-def Keysym (key):
+def Keysym_to_String (key):
 	d=display.Display()
 	keysym = d.keycode_to_keysym(key, 0)
 	return lookup_keysym(keysym)
@@ -65,9 +66,10 @@ def lookup_keysym(keysym):
 	
 def Fake_Key(Key):
 	d=display.Display()
-	xtest.fake_input(d, X.KeyPress, Keycode(Key)) 
+	Key = String_to_Keycode(Key)
+	xtest.fake_input(d, X.KeyPress, Key) 
 	d.sync()
-	xtest.fake_input(d, X.KeyRelease, Keycode(Key))
+	xtest.fake_input(d, X.KeyRelease, Key)
 	d.sync()
 	
 def Fake_Button(Button):

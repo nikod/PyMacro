@@ -1,0 +1,24 @@
+Use the config file to configure the macros.
+
+Example:
+Name_of_the_Window = Action Macro
+
+Action 	- Single (button/key to another button/key)
+		- Multiple (button/key to several button/key)
+		- Script (button/key to a Script)
+
+Macro 	- Single - Key/Button-Key/Button
+		- Multiple - Key/Button(Key/Button-Key/Button-Key/Button-...)
+		- Script - Key/Button-/path/of/the/Script
+
+If you want use a delay(seconds) use Delay|Key/Button, for example:
+Name_of_the_Window = Multiple x(KP_Enter-2|Escape)
+
+To find the keys available using the "keys_available.py" (python key_available.py) 
+that prints all the possibilities.
+
+If you want to use a button you can use it by typing "ButtonX" where X is the number
+of the button you want to press.
+
+Dependencies:	- Python2.7
+				- Python-Xlib
