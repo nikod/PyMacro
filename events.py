@@ -1,20 +1,18 @@
 #!/usr/bin/python2
 
-import sys
-import os
 import multiprocessing
-from Xlib import X, XK, display
-from Xlib.ext import record
+from Xlib import X, display, XK
+from Xlib.ext import record, xtest
 from Xlib.protocol import rq
 
 class Catch(multiprocessing.Process):  
 	
-	def __init__(self):
+	def __init__(self, Detail, Type):
 		multiprocessing.Process.__init__(self)
 		self.disp = display.Display()
-		self.event = lambda x: True
+		self.Detail = Detail
+		self.Type = Type
 
-	
 	def run(self):			  
 		ctx = self.disp.record_create_context(
 				0,
@@ -39,12 +37,42 @@ class Catch(multiprocessing.Process):
 		while len(data):
 			event, data = rq.EventField(None).parse_binary_value(data, self.disp.display, None, None)
 	  
-			if event.type == X.KeyPress:
-				self.event(event.detail)
-			elif event.type == X.ButtonPress:
-				self.event(event.detail)
+			if event.type == X.KeyPress or event.type == X.ButtonPress:
+				self.Detail.put(event.detail)
+				self.Type.put(event.type)
+					
+def Is_Key(event):
+	if event == X.KeyPress:
+		return True
+	else:
+		return False
 
+def Keycode(key):
+	d=display.Display()
+	keycode = d.keysym_to_keycode(key)
+	return keycode
 
-if __name__ == "__main__":
-	catch = Catch()
-	catch.start()
+def Keysym (key):
+	d=display.Display()
+	keysym = d.keycode_to_keysym(key, 0)
+	return lookup_keysym(keysym)
+	
+def lookup_keysym(keysym):
+    for name in dir(XK):
+        if name[:3] == "XK_" and getattr(XK, name) == keysym:
+            return name[3:]
+    return Keycode(keysym)
+	
+def Fake_Key(Key):
+	d=display.Display()
+	xtest.fake_input(d, X.KeyPress, Keycode(Key)) 
+	d.sync()
+	xtest.fake_input(d, X.KeyRelease, Keycode(Key))
+	d.sync()
+	
+def Fake_Button(Button):
+	d=display.Display()
+	xtest.fake_input(d, X.ButtonPress, int(Button)) 
+	d.sync() 
+	xtest.fake_input(d, X.ButtonRelease, int(Button))
+	d.sync()
