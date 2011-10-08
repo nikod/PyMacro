@@ -2,6 +2,7 @@
 import multiprocessing
 import events
 import time
+import subprocess
 
 class Macros(multiprocessing.Process):
 	
@@ -39,7 +40,6 @@ class Macros(multiprocessing.Process):
 	def Multiple(self, macro):
 		macro = macro.split("(")
 		macro[1] = macro[1].strip(")")
-		print macro
 		while True:
 			Detail = self.Detail.get()
 			Type = self.Type.get()
@@ -53,8 +53,18 @@ class Macros(multiprocessing.Process):
 					self.handler(macro)
 	
 	def Script(self, macro):
-		NotImplemented
-
+		macro = macro.split("-")
+		while True:
+			Detail = self.Detail.get()
+			Type = self.Type.get()
+			if events.Is_Key(Type):
+				if events.Keysym_to_String(Detail) == macro[0]:	
+					subprocess.Popen(macro[1])
+						
+			else:
+				if "Button%s" % Detail == macro[0]:
+					subprocess.Popen(macro[1])
+		
 	def handler(self, macro):
 		for i in range(len(macro)):
 			if "|" in macro[i]:
